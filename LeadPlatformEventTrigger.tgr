@@ -1,0 +1,13 @@
+trigger LeadPlatformEventTrigger on LeadPlatformEvent__e (after insert) {
+	for (LeadPlatformEvent__e lpe: Trigger.New) {
+        WrappersForLead.OuterWrapper ow = (WrappersForLead.OuterWrapper)JSON.deserializeStrict(lpe.RawData__c, WrappersForLead.OuterWrapper.class);
+        List<Account> accounts = [SELECT Phone, Description FROM ACCOUNT WHERE Id =: ow.convertedAccountId];
+        List<Account> updatedAccount = new List<Account>();
+        for (Account acc: accounts) {
+            acc.Phone = ow.fieldMapping[0].fieldValue;
+            acc.Description = ow.fieldMapping[1].fieldValue;
+            updatedAccount.add(acc);
+        }
+        update updatedAccount;
+    }
+}
